@@ -1,9 +1,28 @@
 {
+  "name": "ptas-final-6",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "dependencies": {
-    "@prisma/client": "^6.14.0",
-    "node": "^24.6.0"
+    "@prisma/client": "^6.5.0",
+    "bcryptjs": "^3.0.2",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^6.5.0"
   },
-  "devDependencies": {
-    "prisma": "^6.14.0"
-  }
+  "devDependencies": {},
+  "scripts": {
+    "dev": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bemtutuvi/PTAS-FINAL-6.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bemtutuvi/PTAS-FINAL-6/issues"
+  },
+  "homepage": "https://github.com/Bemtutuvi/PTAS-FINAL-6#readme"
 }
