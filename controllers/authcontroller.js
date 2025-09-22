@@ -12,7 +12,7 @@ class AuthController {
     const { nome, email, password } = req.body;
 
     const salt = bcryptjs.genSaltSync(8);
-    const hashPassword = bcryptjs.hashSync(password, salt);
+    const hashPassword = bcryptjs.hashSync(password);
 
     const usuario = await client.usuario.create({
       data: {
@@ -58,6 +58,8 @@ class AuthController {
     const token = jwt.sign({ id: usuario.id }, process.env.SECRET_KEY, {
       expiresIn: "2h",
     });
+
+   
 
     res.json({
       mensagem: "Logado!",
