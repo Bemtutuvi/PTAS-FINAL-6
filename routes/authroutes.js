@@ -7,3 +7,4 @@ router.post("/cadastro", AuthController.cadastrar);
 router.post("/login", AuthController.login);
 
 module.exports = router;
+
