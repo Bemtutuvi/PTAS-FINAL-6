@@ -16,7 +16,3 @@ app.listen(8000, (err) => {
     console.log(`servidor rodando na porta http://localhost:${8000}`);
   }
 });
-
-//verificar com o lucas se o sqlite é apropriado
-//fazer migracao com o prisma
-//mosstrar tudo pra lucas
