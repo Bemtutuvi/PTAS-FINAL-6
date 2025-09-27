@@ -1,72 +1,92 @@
-//tratar da password do usuario gerando e verificando hashes
+const { PrismaClient } = require("@prisma/client");
 const bcryptjs = require("bcryptjs");
-
-//gera tokens de acesso para usuarios autenticados
 const jwt = require("jsonwebtoken");
 
-const { PrismaClient } = require("@prisma/client");
-const client = new PrismaClient();
-
-class AuthController {
+const prisma = new PrismaClient();
+class authcontroller {
   static async cadastrar(req, res) {
     const { nome, email, password } = req.body;
 
-    const salt = bcryptjs.genSaltSync(8);
-    const hashPassword = bcryptjs.hashSync(password);
+    try {
+      const Hashpassword = await bcryptjs.hash(password, 10);
 
-    const usuario = await client.usuario.create({
-      data: {
-        nome,
-        email,
-        password: hashPassword,
-        tipo: "cliente",
-      },
-    });
-    const token = jwt.sign({ id: usuario.id }, process.env.SECRET_KEY, {
-      expiresIn: "2h",
-    });
-    res.json({
-      mensagem:"Cadastro efetuado com sucesso!", 
-      erro:false, 
-      token: token,
-    });
+      const newauth = await prisma.auth.create({
+        data: { nome, email, password: Hashpassword },
+      });
+
+      const token = jwt.sign(
+        { id: newauth.id },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "4h",
+        }
+      );
+
+      return res.status(200).json({
+        erro: false,
+        token,
+        msg: "Usuário cadastrado com sucesso!",
+      });
+    } catch (error) {
+      if (error.code === "P2002") {
+        return res.status(400).json({
+          erro: true,
+          msg: "Email já cadastrado!",
+        });
+      }
+
+      return res
+        .status(500)
+        .json({ erro: true, msg: "Erro interno no servidor" });
+    }
   }
-  
+
   static async login(req, res) {
-    const { email, password } = req.body;
-
-    const usuario = await client.usuario.findUnique({
-      where: { email: email },
-    });
-    if (usuario == null) {
-      res.json({
-        mensagem: "Usuário não encontrado!",
-        erro: true,
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res
+          .status(400)
+          .json({ erro: true, msg: "Email e password são obrigatórios!" });
+      }
+      const auth = await prisma.auth.findUnique({ where: { email } });
+      if (!auth) {
+        return res
+          .status(401)
+          .json({ erro: true, msg: "Usuário não encontrado!" });
+      }
+      const password_valid = await bcryptjs.compare(password, auth.password);
+      if (!password_valid) {
+        return res.status(401).json({ erro: true, msg: "Senha inválida!" });
+      }
+      const token = jwt.sign({ id: auth.id }, process.env.SECRET_KEY, {
+        expiresIn: "4h",
       });
-      return;
-    }
-
-    const passwordCorreta = bcryptjs.compareSync(password, usuario.password);
-
-    if (!passwordCorreta) {
-      res.json({
-        mensagem: "password Incorreta!",
-        erro: true,
+      
+      return res.status(200).json({
+        erro: false,
+        token,
+        msg: "Login realizado com sucesso!",
       });
-      return;
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ erro: true, msg: "Erro interno no servidor" });
     }
-    const token = jwt.sign({ id: usuario.id }, process.env.SECRET_KEY, {
-      expiresIn: "2h",
-    });
-
-   
-
-    res.json({
-      mensagem: "Logado!",
-      erro: false,
-      token: token,
-    });
+  }
+  static async vereficarAutentificacao(req, res, next) {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).json({ erro: true, msg: "Acesso negado!" });
+    }
+    try {
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      req.usuarioId = decoded.id;
+      next();
+    } catch (error) {
+      res.status(400).json({ erro: true, msg: "Token inválido!" });
+    }
   }
 }
 
-module.exports = AuthController;
+module.exports = authcontroller;
