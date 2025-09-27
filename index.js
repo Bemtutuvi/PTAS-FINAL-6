@@ -1,22 +1,25 @@
 const express = require("express");
 const app = express();
 
-
+// configurar o express para receber json
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("ola mundo?");
+});
 
+// rotas de usuario
+const usuarioRoute = require("./routes/usuarioRoute");
+const UsuarioController = require("./controllers/UsuarioController");
 
-const authRoute = require("./routes/authroutes");
-const authcontroller = require("./controllers/authcontroller");
+//mudei o /usuario para /auth
+app.use("/auth", usuarioRoute);
 
-
-app.use("/auth", authRoute);
-
-
+// vereficar se vc esta logado
 app.get(
   "/areaLogada",
-  authcontroller.vereficarAutentificacao,
+  UsuarioController.vereficarAutentificacao,
   (req, res) => {
     res.json({
       msg:
@@ -27,7 +30,7 @@ app.get(
   }
 );
 
-
+// Inicia o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Servidor rodando na porta " + PORT);
