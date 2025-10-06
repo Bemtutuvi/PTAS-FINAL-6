@@ -1,5 +1,7 @@
+require("dotenv").config(); 
 const express = require("express");
 const app = express();
+
 
 // configurar o express para receber json
 app.use(express.urlencoded({ extended: true }));
@@ -10,21 +12,21 @@ app.get("/", (req, res) => {
 });
 
 // rotas de usuario
-const usuarioRoute = require("./routes/usuarioRoute");
-const UsuarioController = require("./controllers/UsuarioController");
+const authRoute = require("./routes/authroutes");
+const authController = require("./controllers/authcontroller");
 
 //mudei o /usuario para /auth
-app.use("/auth", usuarioRoute);
+app.use("/auth", authRoute);
 
 // vereficar se vc esta logado
 app.get(
   "/areaLogada",
-  UsuarioController.vereficarAutentificacao,
+  authController.vereficarAutentificacao,
   (req, res) => {
     res.json({
       msg:
         "vc está logando com o ID: " +
-        req.usuarioId +
+        req.authId +
         " e está permitido a acessar esta área logada",
     });
   }
