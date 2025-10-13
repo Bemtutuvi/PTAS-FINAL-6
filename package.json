@@ -102,15 +102,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/takume31/Reserva-de-Mesa.git"
+    "url": "git+https://github.com/Bemtutuvi/PTAS-FINAL-6.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/takume31/Reserva-de-Mesa/issues"
+    "url": "https://github.com/Bemtutuvi/PTAS-FINAL-6/issues"
   },
-  "homepage": "https://github.com/takume31/Reserva-de-Mesa#readme",
+  "homepage": "https://github.com/Bemtutuvi/PTAS-FINAL-6#readme",
   "devDependencies": {
     "jest": "^30.1.3"
   }

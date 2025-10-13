@@ -1,18 +1,5 @@
 const request = require("supertest");
 const app = require("./index.js");
-const { PrismaClient } = require("@prisma/client");
-
-const prisma = new PrismaClient();
-
-beforeAll(async () => {
-  // Limpa os registros antigos antes dos testes
-  await prisma.auth.deleteMany({});
-});
-
-afterAll(async () => {
-  // Fecha a conexão com o banco após os testes
-  await prisma.$disconnect();
-});
 
 describe("Testes de autenticação", () => {
   let token = "";
@@ -22,36 +9,32 @@ describe("Testes de autenticação", () => {
       .post("/auth/cadastro")
       .send({
         nome: "Teste",
-        email: `teste${Date.now()}@example.com`,
+        email: `teste${Date.now()}@example.com`, // corrigido com template string
         password: "123456",
       });
 
-    // Loga em caso de erro pra debugar facilmente
-    if (res.statusCode !== 200) {
-      console.error("Erro no teste de cadastro:", res.body);
-    }
+    console.log("Resposta cadastro:", res.body); // ajuda a depurar erro 500
 
     expect(res.statusCode).toBe(200);
     expect(res.body.erro).toBe(false);
     expect(res.body).toHaveProperty("token");
-
     token = res.body.token;
   });
 
   it("Não deve cadastrar usuário com email duplicado", async () => {
-    const email = `dup${Date.now()}@example.com`;
+    const emailDuplicado = `exemplo${Date.now()}@gmail.com`;
 
-    // Cadastra pela primeira vez
+    // primeiro cadastro - deve funcionar
     await request(app).post("/auth/cadastro").send({
-      nome: "Usuário duplicado",
-      email,
+      nome: "Teste",
+      email: emailDuplicado,
       password: "123456",
     });
 
-    // Tenta cadastrar novamente com o mesmo email
+    // segundo cadastro - deve falhar
     const res = await request(app).post("/auth/cadastro").send({
-      nome: "Usuário duplicado",
-      email,
+      nome: "Teste",
+      email: emailDuplicado,
       password: "123456",
     });
 
@@ -72,9 +55,7 @@ describe("Testes de autenticação", () => {
       .post("/auth/login")
       .send({ email, password: "123456" });
 
-    if (res.statusCode !== 200) {
-      console.error("Erro no login:", res.body);
-    }
+    console.log("Resposta login:", res.body); // depuração
 
     expect(res.statusCode).toBe(200);
     expect(res.body.erro).toBe(false);
@@ -95,7 +76,7 @@ describe("Testes de autenticação", () => {
     const email = `senha${Date.now()}@example.com`;
 
     await request(app).post("/auth/cadastro").send({
-      nome: "Teste senha",
+      nome: "Teste Senha",
       email,
       password: "123456",
     });
