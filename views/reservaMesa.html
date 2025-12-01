@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reservar Mesa</title>
+</head>
+<body>
+  <h1>Reservar Mesa</h1>
+  <form action="/mesa/reserva_mesa" method="post">
+
+    <label>Nome do Reservante:</label>
+    <input type="text" name="reservadopara" required>
+    <label>Data da Reserva:</label> 
+    <input type="date" name="datareserva" required>
+
+    <label>Número da Mesa:</label>
+    <select name="numeromesa" required>
+      <option value="1">Mesa 1</option>
+      <option value="2">Mesa 2</option>
+      <option value="3">Mesa 3</option>
+    </select>
+    <input type="submit" value="Reservar">
+    <br><br>
+    <a href="/">Página Inicial</a>
+  </form> 
+</body>
+</html>

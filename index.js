@@ -1,41 +1,53 @@
-require("dotenv").config(); 
+require("dotenv").config();
 const express = require("express");
+const path = require("path");
+const jwt = require("jsonwebtoken");
 const app = express();
 
 
-// configurar o express para receber json
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(express.static("views"));
+
 app.get("/", (req, res) => {
-  res.send("ola mundo?");
+  res.sendFile(path.join(__dirname, "views/index.html"));
 });
 
-// rotas de usuario
-const authRoute = require("./routes/authroutes");
-const authController = require("./controllers/authcontroller");
+const usuarioRoute = require("./routes/usuarioRoute");
+app.use("/auth", usuarioRoute);
 
-//mudei o /usuario para /auth
-app.use("/auth", authRoute);
+const mesaRoute = require("./routes/mesaRoute");
 
-// vereficar se vc esta logado
-app.get(
-  "/areaLogada",
-  authController.vereficarAutentificacao,
-  (req, res) => {
-    res.json({
-      msg:
-        "vc está logando com o ID: " +
-        req.authId +
-        " e está permitido a acessar esta área logada",
-    });
+app.use("/mesa", mesaRoute);
+
+const verificarToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ erro: true, msg: "Token não fornecido!" });
   }
-);
 
-// Inicia o servidor
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.PASSWORD_TOKEN);
+    req.usuarioId = decoded.id;
+    next();
+  } catch (err) {
+    return res.status(401).json({ erro: true, msg: "Token inválido!" });
+  }
+};
+
+app.get("/areaLogada", verificarToken, (req, res) => {
+  res.json({
+    msg: `Você está logado com o ID: ${req.usuarioId} e pode acessar esta área.`,
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Servidor rodando na porta " + PORT);
+  console.log(`Servidor rodando na porta http://localhost:${PORT}`);
 });
 
 module.exports = app;
